@@ -1,8 +1,8 @@
 FROM node:20-alpine
-WORKDIR /app
-COPY . .
-RUN npm install || true
-RUN if [ -d backend ]; then cd backend && npm install; fi
-RUN if [ -d frontend ]; then cd frontend && npm install; fi
+WORKDIR /app/backend
+COPY backend/package*.json ./
+RUN npm install
+COPY backend/. .
+COPY ../base_conocimiento_abogados.txt ./base_conocimiento_abogados.txt 2>/dev/null || cp /app/base_conocimiento_abogados.txt ./base_conocimiento_abogados.txt 2>/dev/null || true
 EXPOSE 10000
-CMD ["sh", "-c", "cd backend && npm start"]
+CMD ["npm", "start"]
