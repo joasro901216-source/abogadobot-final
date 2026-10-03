@@ -10,7 +10,7 @@ app.use(cors());
 app.use(express.json());
 
 app.get('/health', (req,res)=> res.json({status:'ok', ai:true, ts: new Date().toISOString()}));
-app.get('/', (req,res)=> res.send('AbogadoBot Backend IA REAL - GROQ FREE'));
+app.get('/',(req,res)=> res.send('AbogadoBot Backend IA REAL - GROQ FREE'));
 
 app.post('/api/chat', async (req,res)=>{
   try{
@@ -31,7 +31,7 @@ IMPORTANTE: Esta es la pregunta ${preguntaNum+1}. Si preguntaNum >=2 y isPremium
         'Authorization': `Bearer ${process.env.GROQ_API_KEY}`
       },
       body: JSON.stringify({
-        model: "llama-3.1-8b-instant",
+        model: "llama3-8b-8192",
         messages: [{role:"system", content: system},{role:"user", content: message}],
         max_tokens: 800,
         temperature: 0.6
@@ -46,13 +46,13 @@ IMPORTANTE: Esta es la pregunta ${preguntaNum+1}. Si preguntaNum >=2 y isPremium
 
     let reply = completion.choices[0].message.content;
     const needPay = preguntaNum >= 2 &&!isPremium;
-    if(needPay) reply += `\n\n🔒 Has gastado tus 2 consultas gratis. Para PDF del Modelo 037 relleno, cálculo RETA y chat ilimitado, paga Premium 9.99€: paypal.me/AbogadoBotES/9.99EUR`;
+    if(needPay) reply += '\n\n🔒 Has gastado tus 2 consultas gratis. Para PDF del Modelo 037 relleno, cálculo RETA y chat ilimitado: paypal.me/AbogadoBotES/9.99EUR';
 
     return res.json({ reply, needPay, ai:true });
 
   }catch(e){
     console.error(e);
-    res.status(500).json({ reply:"Error Groq: "+e.message+" Verifica tu GROQ_API_KEY en Render Environment", needPay:false, ai:false });
+    res.status(500).json({ reply:"Error Groq: "+e.message+" Verifica tu GROQ_API_KEY en Render Environment", needPay:false });
   }
 });
 
