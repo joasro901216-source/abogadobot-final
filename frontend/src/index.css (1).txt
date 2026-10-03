@@ -1,0 +1,20 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: #0f172a;
+  --primary: #3b82f6;
+}
+
+body {
+  margin: 0;
+  font-family: Inter, system-ui, -apple-system, sans-serif;
+  background: #0f172a;
+  color: white;
+  -webkit-font-smoothing: antialiased;
+}
+
+textarea {
+  font-size: 16px !important; /* evita zoom iPhone */
+}
