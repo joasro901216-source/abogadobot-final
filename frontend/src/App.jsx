@@ -10,7 +10,7 @@ const PROFESIONES = [
 ]
 export default function App(){
   const [tab,setTab]=useState('guia')
-  const [isPremium,setIsPremium]=useState(true)
+  const [isPremium,setIsPremium]=useState(false)
   const [showPay,setShowPay]=useState(false)
   const [input,setInput]=useState('Quiero ser autonomo en pintura que debo hacer')
   const [chat,setChat]=useState([])
@@ -30,18 +30,16 @@ export default function App(){
 
 **DOCUMENTOS QUE NECESITAS:**
 1. **Modelo 036/037** (Hacienda): Marca alta, epígrafe ${p.id}, fecha inicio.
-2. **Alta RETA** (Seguridad Social - Importass): 80€/mes con Tarifa Plana si es tu primera vez. Si no, ${trab==='solo'?'230€-350€/mes':'necesitas CCC para trabajadores'}.
-3. **Seguro Responsabilidad Civil**: Obligatorio para pintores (caída pintura, daños).
-4. **Prevención Riesgos**: Curso 20h PRL pintura.
-5. **Licencia**: No necesitas local, pero si furgoneta, alta vehículo.
+2. **Alta RETA** (Seguridad Social): 80€/mes con Tarifa Plana.
+3. **Seguro RC**: ${esPintor?'Obligatorio para pintores':''}
+4. **Prevención Riesgos**: Curso 20h PRL.
 
-**${esPintor?'PLUS PINTOR: Necesitas alta en IAE 505.3, puedes facturar materiales + mano de obra con IVA 21%. Gastos deducibles: pintura, brochas, furgoneta, gasolina 50%.':''}**
-
-¿Quieres que te genere el Modelo 037 relleno para ${p.label}? ${!isPremium?'Desbloquea Premium 9.99€ para descargarlo.':''}`
+${!isPremium?'🔒 Desbloquea PREMIUM 9,99€ para descargar el Modelo 037 relleno.':`✅ PREMIUM: Te genero el Modelo 037 para ${p.label} IAE ${p.id}`}`
   }
 
   const sendChat=()=>{
     if(!input.trim()) return
+    if(!isPremium && chat.length>=2){ setShowPay(true); return }
     const userMsg={role:'user',text:input}
     const aiMsg={role:'ai',text:genIA(input)}
     setChat([...chat,userMsg,aiMsg])
@@ -59,7 +57,7 @@ export default function App(){
   return(
     <div style={{minHeight:'100vh',background:'#0a1020',color:'white',display:'flex',justifyContent:'center',padding:'12px',fontFamily:'system-ui'}}>
       <div style={{width:'100%',maxWidth:'700px'}}>
-        <h1 style={{fontSize:'24px',fontWeight:'800',margin:'8px 0'}}>⚖️ AbogadoBot <span style={{background:'#16a34a',fontSize:'10px',padding:'4px 8px',borderRadius:'10px',marginLeft:'8px'}}>PREMIUM ACTIVO</span></h1>
+        <h1 style={{fontSize:'24px',fontWeight:'800',margin:'8px 0'}}>⚖️ AbogadoBot <span style={{background:isPremium?'#16a34a':'#f59e0b',fontSize:'10px',padding:'4px 8px',borderRadius:'10px',marginLeft:'8px'}}>{isPremium?'PREMIUM ACTIVO':'9,99€ PREMIUM'}</span></h1>
 
         <div style={{display:'flex',gap:'6px',marginBottom:'12px'}}>
           <button onClick={()=>setTab('calc')} style={{flex:1,padding:'10px',borderRadius:'10px',border:'none',background:tab==='calc'?'#2563eb':'#1e293b',color:'white'}}>💰 Calculadora</button>
@@ -70,20 +68,17 @@ export default function App(){
         <div style={{background:'#162032',borderRadius:'16px',padding:'14px',border:'1px solid #2a3a55'}}>
           {tab==='guia' && <div>
             <div style={{background:'#0f172a',padding:'12px',borderRadius:'10px',marginBottom:'10px',border:'1px solid #1e293b'}}>
-              <b style={{color:'#60a5fa',fontSize:'13px'}}>🤖 Asistente IA AbogadoBot - Ahora sí responde</b><br/>
-              <span style={{fontSize:'11px',color:'#94a3b8'}}>Entiende: pintor, abogado, tienda, peluquería, etc. + cuántos trabajadores</span>
+              <b style={{color:'#60a5fa',fontSize:'13px'}}>🤖 Asistente IA AbogadoBot</b><br/>
+              <span style={{fontSize:'11px',color:'#94a3b8'}}>Escribe: pintor, abogado, tienda, peluquería, etc.</span>
             </div>
-
             <div style={{maxHeight:'360px',overflowY:'auto',display:'flex',flexDirection:'column',gap:'8px',marginBottom:'10px'}}>
-              {chat.length===0 && <div style={{background:'#0f172a',padding:'12px',borderRadius:'10px',fontSize:'13px',color:'#94a3b8'}}>Ejemplo: escribe "quiero ser autónomo en pintura con 1 trabajador"</div>}
+              {chat.length===0 && <div style={{background:'#0f172a',padding:'12px',borderRadius:'10px',fontSize:'13px',color:'#94a3b8'}}>Ejemplo: "quiero ser autónomo en pintura con 1 trabajador"</div>}
               {chat.map((m,i)=><div key={i} style={{background:m.role==='user'?'#2563eb':'#0f172a',alignSelf:m.role==='user'?'flex-end':'flex-start',padding:'10px 12px',borderRadius:'12px',maxWidth:'90%',fontSize:'13px',whiteSpace:'pre-wrap',lineHeight:'1.5',border:m.role==='ai'?'1px solid #22c55e':'none'}}>{m.text}</div>)}
             </div>
-
             <div style={{display:'flex',gap:'6px'}}>
               <input value={input} onChange={e=>setInput(e.target.value)} onKeyDown={e=>e.key==='Enter'&&sendChat()} placeholder="Ej: quiero ser autonomo en pintura..." style={{flex:1,background:'#0f172a',border:'1px solid #334155',borderRadius:'10px',padding:'12px',color:'white',fontSize:'13px'}}/>
               <button onClick={sendChat} style={{background:'#22c55e',border:'none',borderRadius:'10px',padding:'0 18px',color:'black',fontWeight:'800'}}>Enviar</button>
             </div>
-            <p style={{fontSize:'10px',color:'#64748b',marginTop:'6px'}}>IA local determinista - Funciona sin OpenAI key. Detecta tu profesión automáticamente.</p>
           </div>}
 
           {tab==='alta' && <div>
@@ -97,7 +92,7 @@ export default function App(){
               <option value='3+'>3+ trabajadores</option>
             </select>
             <div style={{background:'#0f172a',padding:'12px',borderRadius:'10px',fontSize:'12px',lineHeight:'1.6',border:'1px solid #2563eb'}}>
-              Checklist para <b>{prof.label}</b> (IAE {prof.id}) con {trab}: Modelo 037 + RETA 80€ + {prof.id==='505'?'Seguro RC + PRL pintura':''} {trab!=='solo'?' + CCC + contratos':''}
+              Checklist para <b>{prof.label}</b> (IAE {prof.id}) con {trab}: Modelo 037 + RETA 80€ {trab!=='solo'?' + CCC + contratos':''}
             </div>
           </div>}
 
@@ -110,26 +105,5 @@ export default function App(){
           </div>}
         </div>
 
-        <div style={{marginTop:'14px',background:'#1e293b',borderRadius:'12px',padding:'12px',border:'1px solid #334155'}}>
-          <b style={{fontSize:'13px'}}>💳 Cómo cobrar los 9.99€ en tu cuenta REAL:</b>
-          <ol style={{fontSize:'11px',color:'#cbd5e1',lineHeight:'1.7',margin:'8px 0 0 16px'}}>
-            <li>Ve a <b>stripe.com</b> y crea cuenta (gratis)</li>
-            <li>En Stripe → Conecta tu IBAN español (donde quieres que llegue el dinero)</li>
-            <li>Crea Producto: "AbogadoBot Premium 9.99€"</li>
-            <li>Copia tu "Publishable Key" y pégala en Render → abogadobot-final-1 → Environment → STRIPE_KEY</li>
-            <li>Stripe te paga cada 7 días automático a tu banco (comisión 1.5% + 0.25€)</li>
-          </ol>
-          <button onClick={()=>setShowPay(true)} style={{marginTop:'10px',width:'100%',background:'#f59e0b',border:'none',borderRadius:'10px',padding:'10px',fontWeight:'800'}}>Ver Demo Cobro Stripe</button>
-        </div>
-      </div>
-
-      {showPay && <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.85)',display:'flex',justifyContent:'center',alignItems:'center',zIndex:999,padding:'16px'}}>
-        <div style={{background:'#162032',borderRadius:'16px',padding:'18px',maxWidth:'340px',width:'100%',border:'1px solid #334155'}}>
-          <h3 style={{margin:0}}>💳 Stripe Checkout Real</h3>
-          <p style={{fontSize:'12px',color:'#94a3b8'}}>Cuando conectes Stripe, aquí saldrá la ventana real de pago con tarjeta y el dinero llega a tu cuenta.</p>
-          <button onClick={()=>setShowPay(false)} style={{width:'100%',marginTop:'12px',background:'#22c55e',border:'none',borderRadius:'10px',padding:'10px',fontWeight:'800'}}>Entendido</button>
-        </div>
-      </div>}
-    </div>
-  )
-}
+        {!isPremium && <div style={{marginTop:'14px',background:'#f59e0b',borderRadius:'12px',padding:'14px'}}>
+          <b style={{fontSize:'14px',color:'black'}}>🔓 Desbloquear
