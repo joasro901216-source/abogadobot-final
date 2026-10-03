@@ -31,7 +31,7 @@ IMPORTANTE: Esta es la pregunta ${preguntaNum+1}. Si preguntaNum >=2 y isPremium
         'Authorization': `Bearer ${process.env.GROQ_API_KEY}`
       },
       body: JSON.stringify({
-        model: "llama3-8b-8192",
+        model: "openai/gpt-oss-20b",
         messages: [{role:"system", content: system},{role:"user", content: message}],
         max_tokens: 800,
         temperature: 0.6
