@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import jsPDF from 'jspdf';
 
 const API_URL = import.meta.env.VITE_API_URL || "https://abogadobot-backend.onrender.com";
 
@@ -10,26 +11,46 @@ export default function App() {
   const [needPay, setNeedPay] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  const generarPDF = () => {
+    const doc = new jsPDF();
+    doc.setFontSize(16);
+    doc.text("Modelo 037 - Alta Autonomos", 20, 20);
+    doc.setFontSize(11);
+    doc.text("Nombre: _________________________", 20, 40);
+    doc.text("NIF: ____________________________", 20, 50);
+    doc.text("Actividad: Electricista con furgoneta", 20, 60);
+    doc.text("Epigrafe IAE: 504.1 Instalaciones electricas", 20, 70);
+    doc.text("Domicilio: ______________________ Gandia", 20, 80);
+    doc.text("Fecha alta: " + new Date().toLocaleDateString(), 20, 90);
+    doc.text("--- Checklist PRL Autonomo ---", 20, 110);
+    doc.text("- Casco, botas seguridad, guantes dielectricos", 20, 120);
+    doc.text("- Seguro responsabilidad civil", 20, 130);
+    doc.text("- Alta RETA + Modelo 037 presentado", 20, 140);
+    doc.text("Generado por AbogadoBot Gandia - Premium 9,99EUR", 20, 160);
+    doc.save("Modelo_037_Electricista_Gandia.pdf");
+  };
+
   const sendMessage = async () => {
     if(!input.trim()) return;
     const userMsg = { role:'user', text:input };
     setMessages([...messages, userMsg]);
     setLoading(true);
-
-    const res = await fetch(`${API_URL}/api/chat`, {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ message: input, isPremium, freeUsed })
-    });
-    const data = await res.json();
-    
-    setMessages(m => [...m, { role:'bot', text: data.reply }]);
-    setNeedPay(data.needPay);
-    
-    if(!isPremium){
-      const newCount = freeUsed + 1;
-      setFreeUsed(newCount);
-      localStorage.setItem('freeUsed', newCount);
+    try {
+      const res = await fetch(`${API_URL}/api/chat`, {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ message: input, isPremium, freeUsed })
+      });
+      const data = await res.json();
+      setMessages(m => [...m, { role:'bot', text: data.reply }]);
+      setNeedPay(data.needPay);
+      if(!isPremium){
+        const newCount = freeUsed + 1;
+        setFreeUsed(newCount);
+        localStorage.setItem('freeUsed', newCount);
+      }
+    } catch(e){
+      setMessages(m => [...m, { role:'bot', text: "Error de conexion. Revisa el backend en Render." }]);
     }
     setInput("");
     setLoading(false);
@@ -53,11 +74,11 @@ export default function App() {
             <p><b>🔒 Has usado tus 2 consultas gratis</b></p>
             <p>Desbloquea Premium 9,99€ para chat ilimitado + PDFs</p>
             <a href="https://paypal.me/AbogadoBotES/9.99EUR" target="_blank" style={{background:"#0070BA", color:"white", padding:"12px 24px", borderRadius:"8px", textDecoration:"none", fontWeight:"bold", display:"inline-block", margin:"10px 0"}}>
-              Pagar 9,99€ con PayPal
+              Pagar 9,99€ con 【entity-PayPal¦canonical_name=PayPal】
             </a>
             <br/>
             <button onClick={()=>{
-              const code = prompt("Pega el ID de PayPal:");
+              const code = prompt("Pega el ID de transaccion de 【entity-PayPal¦canonical_name=PayPal】:");
               if(code){
                 localStorage.setItem("isPremium","true");
                 setIsPremium(true);
@@ -75,7 +96,7 @@ export default function App() {
         <input value={input} onChange={e=>setInput(e.target.value)} onKeyDown={e=>e.key==='Enter'&&sendMessage()} placeholder="Escribe: soy electricista..." style={{flex:1, padding:10}} />
         <button onClick={sendMessage} disabled={needPay && !isPremium} style={{padding:'10px 20px'}}>Enviar</button>
       </div>
-      {isPremium && <button style={{marginTop:10, width:'100%', padding:10, background:"green", color:"white"}}>📄 Descargar PDFs Modelo 037</button>}
+      {isPremium && <button onClick={generarPDF} style={{marginTop:15, width:'100%', padding:12, background:"green", color:"white", fontWeight:"bold", borderRadius:8}}>📄 Descargar Modelo 037 + Checklist PRL</button>}
     </div>
   );
 }
